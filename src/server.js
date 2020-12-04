@@ -5,8 +5,22 @@ import path from 'path';
 
 const app = express();
 
-app.use(express.static(path.join(__dirname, '/build')));
+//app.use(express.static(path.join(__dirname, '/build')));
 app.use(bodyParser.json());
+
+app.get('/api/analytics/', async (req, res) => {
+        try {
+        const client = await MongoClient.connect('mongodb://localhost:27017', { useNewUrlParser: true });
+        const db = client.db('my-project');
+        const analyticsInfo = await db.collection('analytics').find({ }).toArray()
+        res.status(200).json(analyticsInfo);
+        client.close()
+        } catch (error) {
+            res.status(500).json({ message: 'Error connecting to db', error });
+        }
+       
+    })
+
 
 const withDB = async (operations, res) => {
     try {
